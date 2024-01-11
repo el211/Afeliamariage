@@ -1,0 +1,23 @@
+name: AfeliaMarriage
+version: 1.0
+description: A Minecraft marriage plugin
+author: YourName
+api-version: '1.20' # Replace with the appropriate Bukkit/Spigot API version
+main: com.elias.afeliamarriage.AfeliaMarriage
+
+commands:
+  marriagegui:
+    description: Ouvrir l'interface de mariage
+    usage: /marriagegui
+
+  divorce:
+    description: Commande de divorce
+    usage: /divorce
+
+  setmariagehome:
+    description: Commande pour définir la maison de mariage
+    usage: /setmariagehome
+
+  mariagehome:
+    description: Commande de téléportation vers la maison de mariage
+    usage: /mariagehome
