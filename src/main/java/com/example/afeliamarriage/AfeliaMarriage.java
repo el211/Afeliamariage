@@ -244,4 +244,3 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
         }
     }
 }
-
