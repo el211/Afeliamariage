@@ -1,4 +1,4 @@
-package com.example.afeliamarriage;
+package com.elias.afeliamarriage;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -14,6 +14,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
@@ -126,19 +128,22 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
     }
 
     private void applyMarriageEffects(Player player1, Player player2) {
-        // Implement marriage effects here, e.g., resistance and strength II
-        // Check if the players are close and apply effects
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (player1.isOnline() && player2.isOnline() &&
-                        player1.getLocation().distanceSquared(player2.getLocation()) <= 16) {
-                    player1.sendMessage(ChatColor.YELLOW + "Vous ressentez la présence de votre partenaire.");
-                    player2.sendMessage(ChatColor.YELLOW + "Vous ressentez la présence de votre partenaire.");
-                    // Apply effects here, e.g., player1.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 600, 1));
-                }
-            }
-        }.runTaskLater(this, 20L); // Delay for 1 second to ensure players are online
+        if (!player1.isOnline() || !player2.isOnline()) return;
+
+        double distance = player1.getLocation().distance(player2.getLocation());
+        if (distance <= 16) {
+            player1.sendMessage(ChatColor.YELLOW + "Vous ressentez la présence de votre partenaire.");
+            player2.sendMessage(ChatColor.YELLOW + "Vous ressentez la présence de votre partenaire.");
+
+            PotionEffect resistance = new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 600, 1);
+            PotionEffect strength = new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 600, 2);
+
+            player1.addPotionEffect(resistance);
+            player2.addPotionEffect(resistance);
+
+            player1.addPotionEffect(strength);
+            player2.addPotionEffect(strength);
+        }
     }
 
     private void handleDivorce(Player player) {
@@ -162,8 +167,10 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
     private void setMarriageHome(Player player) {
         UUID playerId = player.getUniqueId();
         if (marriages.containsKey(playerId)) {
+            UUID partnerId = marriages.get(playerId);
             Location playerLocation = player.getLocation();
             marriageHomes.put(playerId, playerLocation);
+            marriageHomes.put(partnerId, playerLocation);
             player.sendMessage(ChatColor.GREEN + "Vous avez défini votre maison de mariage.");
         } else {
             player.sendMessage(ChatColor.RED + "Vous devez être marié(e) pour définir une maison de mariage.");
