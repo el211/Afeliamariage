@@ -81,13 +81,13 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
     }
 
     private void openMainGUI(Player player) {
-        Inventory mainGUI = Bukkit.createInventory(null, 9, ChatColor.BOLD + "Marriage Status");
+        Inventory mainGUI = Bukkit.createInventory(null, 45, ChatColor.BOLD + "Marriage Status");
 
         ItemStack proposeItem = new ItemStack(Material.DIAMOND);
         ItemMeta proposeItemMeta = proposeItem.getItemMeta();
         proposeItemMeta.setDisplayName(ChatColor.AQUA + "Choisir un Mari/Une Femme");
         proposeItem.setItemMeta(proposeItemMeta);
-        mainGUI.setItem(0, proposeItem);
+        mainGUI.setItem(21, proposeItem);
 
         player.openInventory(mainGUI);
     }
