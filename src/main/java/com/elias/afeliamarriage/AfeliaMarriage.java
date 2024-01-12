@@ -93,7 +93,7 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
     }
 
     private void openPlayerSelectionGUI(Player proposer) {
-        Inventory playerSelectionGUI = Bukkit.createInventory(null, 9, ChatColor.BOLD + "Sélectionner un Joueur");
+        Inventory playerSelectionGUI = Bukkit.createInventory(null, 45, ChatColor.BOLD + "Sélectionner un Joueur");
 
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             if (!onlinePlayer.equals(proposer)) {
