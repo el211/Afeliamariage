@@ -19,10 +19,14 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 public class AfeliaMarriage extends JavaPlugin implements Listener {
+
+    private static final PotionEffect RESISTANCE = new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 600, 1);
+    private static final PotionEffect STRENGTH_II = new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 600, 2);
 
     private final Map<UUID, UUID> marriages = new HashMap<>();
     private final Map<UUID, Location> marriageHomes = new HashMap<>();
@@ -42,6 +46,18 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
                 saveMarriages();
             }
         }.runTaskTimer(this, 1200L, 1200L); // Save every minute (20 ticks * 60 seconds)
+
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
+            for (Map.Entry<UUID, UUID> entry : marriages.entrySet()) {
+                UUID player1Id = entry.getKey();
+                UUID player2Id = entry.getValue();
+
+                Player player1 = Bukkit.getPlayer(player1Id);
+                Player player2 = Bukkit.getPlayer(player2Id);
+
+                applyMarriageEffects(player1, player2);
+            }
+        }, 100L, 100L); // Check every 5 seconds (20 ticks * 5 seconds)
 
         getCommand("marriagegui").setExecutor((sender, command, label, args) -> {
             if (sender instanceof Player) {
@@ -128,21 +144,33 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
     }
 
     private void applyMarriageEffects(Player player1, Player player2) {
+        if (player1 == null || player2 == null) return;
         if (!player1.isOnline() || !player2.isOnline()) return;
 
         double distance = player1.getLocation().distance(player2.getLocation());
-        if (distance <= 16) {
+        if (distance > 4) return;
+
+        boolean haveEffect =
+                hasEffects(player1, RESISTANCE.getType(), STRENGTH_II.getType()) &&
+                hasEffects(player2, RESISTANCE.getType(), STRENGTH_II.getType());
+
+        if (!haveEffect) {
             player1.sendMessage(ChatColor.YELLOW + "Vous ressentez la présence de votre partenaire.");
             player2.sendMessage(ChatColor.YELLOW + "Vous ressentez la présence de votre partenaire.");
+        }
 
-            PotionEffect resistance = new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 600, 1);
-            PotionEffect strength = new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 600, 2);
+        applyEffects(player1, RESISTANCE, STRENGTH_II);
+        applyEffects(player2, RESISTANCE, STRENGTH_II);
+    }
 
-            player1.addPotionEffect(resistance);
-            player2.addPotionEffect(resistance);
+    private boolean hasEffects(Player player, PotionEffectType... effects) {
+        List<PotionEffectType> list = List.of(effects);
+        return list.stream().allMatch(player::hasPotionEffect);
+    }
 
-            player1.addPotionEffect(strength);
-            player2.addPotionEffect(strength);
+    private void applyEffects(Player player, PotionEffect... effects) {
+        for (PotionEffect effect : effects) {
+            player.addPotionEffect(effect);
         }
     }
 
