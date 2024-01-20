@@ -18,6 +18,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +69,9 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
             return true;
         });
 
+        // Set a custom TabCompleter to hide the command from suggestions
+        getCommand("marriagegui").setTabCompleter((sender, command, alias, args) -> Collections.emptyList());
+
         getCommand("divorce").setExecutor((sender, command, label, args) -> {
             if (sender instanceof Player) {
                 handleDivorce((Player) sender);
@@ -99,9 +103,10 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
     private void openMainGUI(Player player) {
         Inventory mainGUI = Bukkit.createInventory(null, 45, ChatColor.BOLD + "Marriage Status");
 
-        ItemStack proposeItem = new ItemStack(Material.DIAMOND);
+        ItemStack proposeItem = new ItemStack(Material.CLAY_BALL);
         ItemMeta proposeItemMeta = proposeItem.getItemMeta();
-        proposeItemMeta.setDisplayName(ChatColor.AQUA + "Choisir un Mari/Une Femme");
+        proposeItemMeta.setDisplayName(ChatColor.AQUA + "Choisir un Partenaire!");
+        proposeItemMeta.setCustomModelData(6); // Set custom model data to 6
         proposeItem.setItemMeta(proposeItemMeta);
         mainGUI.setItem(21, proposeItem);
 
@@ -152,7 +157,7 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
 
         boolean haveEffect =
                 hasEffects(player1, RESISTANCE.getType(), STRENGTH_II.getType()) &&
-                hasEffects(player2, RESISTANCE.getType(), STRENGTH_II.getType());
+                        hasEffects(player2, RESISTANCE.getType(), STRENGTH_II.getType());
 
         if (!haveEffect) {
             player1.sendMessage(ChatColor.YELLOW + "Vous ressentez la présence de votre partenaire.");
@@ -266,8 +271,11 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
         ItemStack clickedItem = event.getCurrentItem();
         if (clickedItem == null || clickedItem.getType() == Material.AIR) return;
 
-        if (clickedItem.getType() == Material.DIAMOND) {
-            openPlayerSelectionGUI(player);
+        if (clickedItem.getType() == Material.CLAY_BALL) {
+            ItemMeta itemMeta = clickedItem.getItemMeta();
+            if (itemMeta != null && itemMeta.hasCustomModelData() && itemMeta.getCustomModelData() == 6) {
+                openPlayerSelectionGUI(player);
+            }
         } else if (clickedItem.getType() == Material.PLAYER_HEAD) {
             Player selectedPlayer = Bukkit.getPlayer(((SkullMeta) clickedItem.getItemMeta()).getOwningPlayer().getName());
             if (selectedPlayer != null && selectedPlayer.isOnline()) {
