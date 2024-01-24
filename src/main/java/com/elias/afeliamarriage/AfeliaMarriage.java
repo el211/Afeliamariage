@@ -59,6 +59,18 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
             }
         }, 100L, 100L);
 
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
+            for (Map.Entry<UUID, UUID> entry : marriages.entrySet()) {
+                UUID player1Id = entry.getKey();
+                UUID player2Id = entry.getValue();
+
+                Player player1 = Bukkit.getPlayer(player1Id);
+                Player player2 = Bukkit.getPlayer(player2Id);
+
+                applyMarriageEffects(player1, player2);
+            }
+        }, 100L, 100L); // Check every 5 seconds (20 ticks * 5 seconds)
+
         getCommand("marriagegui").setExecutor((sender, command, label, args) -> {
             if (sender instanceof Player) {
                 openMainGUI((Player) sender);
@@ -68,6 +80,10 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
             return true;
         });
 
+<<<<<<< HEAD
+=======
+        // Set a custom TabCompleter to hide the command from suggestions
+>>>>>>> 6709398758a01409b14460aca018cffc4b162ac1
         getCommand("marriagegui").setTabCompleter((sender, command, alias, args) -> Collections.emptyList());
 
         getCommand("divorce").setExecutor((sender, command, label, args) -> {
@@ -99,12 +115,20 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
     }
 
     private void openMainGUI(Player player) {
+<<<<<<< HEAD
         Inventory mainGUI = Bukkit.createInventory(new MarriageInventoryHolder(), 45, ChatColor.BOLD + "Marriage Status");
+=======
+        Inventory mainGUI = Bukkit.createInventory(null, 45, ChatColor.BOLD + "Marriage Status");
+>>>>>>> 6709398758a01409b14460aca018cffc4b162ac1
 
         ItemStack proposeItem = new ItemStack(Material.CLAY_BALL);
         ItemMeta proposeItemMeta = proposeItem.getItemMeta();
         proposeItemMeta.setDisplayName(ChatColor.AQUA + "Choisir un Partenaire!");
+<<<<<<< HEAD
         proposeItemMeta.setCustomModelData(6);
+=======
+        proposeItemMeta.setCustomModelData(6); // Set custom model data to 6
+>>>>>>> 6709398758a01409b14460aca018cffc4b162ac1
         proposeItem.setItemMeta(proposeItemMeta);
         mainGUI.setItem(21, proposeItem);
 
@@ -112,7 +136,11 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
     }
 
     private void openPlayerSelectionGUI(Player proposer) {
+<<<<<<< HEAD
         Inventory playerSelectionGUI = Bukkit.createInventory(new MarriageInventoryHolder(), 45, ChatColor.BOLD + "Sélectionner un Joueur");
+=======
+        Inventory playerSelectionGUI = Bukkit.createInventory(null, 45, ChatColor.BOLD + "Sélectionner un Joueur");
+>>>>>>> 6709398758a01409b14460aca018cffc4b162ac1
 
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             if (!onlinePlayer.equals(proposer)) {
@@ -267,7 +295,24 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
         ItemStack clickedItem = event.getCurrentItem();
         if (clickedItem == null || clickedItem.getType() == Material.AIR) return;
 
+<<<<<<< HEAD
         MarriageInventoryHolder marriageHolder = (MarriageInventoryHolder) event.getInventory().getHolder();
         marriageHolder.handleMarriageInventoryClick(player, clickedItem);
+=======
+        if (clickedItem.getType() == Material.CLAY_BALL) {
+            ItemMeta itemMeta = clickedItem.getItemMeta();
+            if (itemMeta != null && itemMeta.hasCustomModelData() && itemMeta.getCustomModelData() == 6) {
+                openPlayerSelectionGUI(player);
+            }
+        } else if (clickedItem.getType() == Material.PLAYER_HEAD) {
+            Player selectedPlayer = Bukkit.getPlayer(((SkullMeta) clickedItem.getItemMeta()).getOwningPlayer().getName());
+            if (selectedPlayer != null && selectedPlayer.isOnline()) {
+                proposeMarriage(player, selectedPlayer);
+                player.closeInventory();
+            } else {
+                player.sendMessage(ChatColor.RED + "Joueur introuvable ou non connecté.");
+            }
+        }
+>>>>>>> 6709398758a01409b14460aca018cffc4b162ac1
     }
 }
