@@ -13,7 +13,7 @@ Afelia Marriage is a Bukkit plugin that adds a marriage system to your Minecraft
 
 ## Installation
 
-1. Download the latest release JAR file from the [Releases]([https://github.com/yourusername/AfeliaMarriage/releases](https://github.com/el211/Afeliamariage/releases/tag/plugin)) page.
+1. Download the latest release JAR file from the [Releases]([https://github.com/el211/Afeliamariage/releases/tag/plugin]) page.
 2. Place the JAR file in the `plugins` folder of your Bukkit/Spigot server.
 3. Restart your server.
 
