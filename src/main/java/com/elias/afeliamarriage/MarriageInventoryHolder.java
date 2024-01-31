@@ -9,11 +9,18 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.plugin.java.JavaPlugin;
+import java.util.UUID;
+import java.util.Map;
+
+
 
 public class MarriageInventoryHolder implements org.bukkit.inventory.InventoryHolder {
 
-    private org.bukkit.Bukkit Bukkit;
+    private final AfeliaMarriage plugin;
+
+    public MarriageInventoryHolder(AfeliaMarriage plugin) {
+        this.plugin = plugin;
+    }
 
     @Override
     public Inventory getInventory() {
@@ -21,17 +28,26 @@ public class MarriageInventoryHolder implements org.bukkit.inventory.InventoryHo
     }
 
     public void handleMarriageInventoryClick(Player player, ItemStack clickedItem) {
+        System.out.println("Handling marriage inventory click for player: " + player.getName());
+
         if (clickedItem.getType() == Material.CLAY_BALL) {
+            System.out.println("Player clicked on propose item");
+
             ItemMeta itemMeta = clickedItem.getItemMeta();
             if (itemMeta != null && itemMeta.hasCustomModelData() && itemMeta.getCustomModelData() == 6) {
+                System.out.println("Custom model data matches. Opening player selection GUI.");
                 openPlayerSelectionGUI(player);
             }
         } else if (clickedItem.getType() == Material.PLAYER_HEAD) {
+            System.out.println("Player clicked on player head item");
+
             Player selectedPlayer = Bukkit.getPlayer(((SkullMeta) clickedItem.getItemMeta()).getOwningPlayer().getName());
             if (selectedPlayer != null && selectedPlayer.isOnline()) {
+                System.out.println("Selected player: " + selectedPlayer.getName());
                 proposeMarriage(player, selectedPlayer);
                 player.closeInventory();
             } else {
+                System.out.println("Selected player not found or not online.");
                 player.sendMessage(ChatColor.RED + "Joueur introuvable ou non connecté.");
             }
         }
@@ -55,8 +71,14 @@ public class MarriageInventoryHolder implements org.bukkit.inventory.InventoryHo
     }
 
     private void proposeMarriage(Player proposer, Player selectedPlayer) {
+        Map<UUID, UUID> marriages = plugin.getMarriages();
+
         proposer.sendMessage(ChatColor.GREEN + "Vous avez proposé le mariage à " + selectedPlayer.getName() + " !");
         selectedPlayer.sendMessage(ChatColor.LIGHT_PURPLE + proposer.getName() + " vous a proposé le mariage !");
-        // Add your marriage logic here
+
+        marriages.put(proposer.getUniqueId(), selectedPlayer.getUniqueId());
+        marriages.put(selectedPlayer.getUniqueId(), proposer.getUniqueId());
+
+        // Optional: You may want to trigger additional events or actions related to marriage here.
     }
 }
