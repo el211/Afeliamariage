@@ -12,8 +12,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -22,9 +20,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
-public class AfeliaMarriage extends JavaPlugin implements Listener {
+public class AfeliaMarriage extends org.bukkit.plugin.java.JavaPlugin implements Listener {
 
     private static final PotionEffect RESISTANCE = new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 600, 1);
     private static final PotionEffect STRENGTH_II = new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 600, 2);
@@ -59,7 +58,7 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
             }
         }, 100L, 100L);
 
-        getCommand("marriagegui").setExecutor((sender, command, label, args) -> {
+        Objects.requireNonNull(getCommand("marriagegui")).setExecutor((sender, command, label, args) -> {
             if (sender instanceof Player) {
                 openMainGUI((Player) sender);
             } else {
@@ -68,9 +67,9 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
             return true;
         });
 
-        getCommand("marriagegui").setTabCompleter((sender, command, alias, args) -> Collections.emptyList());
+        Objects.requireNonNull(getCommand("marriagegui")).setTabCompleter((sender, command, alias, args) -> Collections.emptyList());
 
-        getCommand("divorce").setExecutor((sender, command, label, args) -> {
+        Objects.requireNonNull(getCommand("divorce")).setExecutor((sender, command, label, args) -> {
             if (sender instanceof Player) {
                 handleDivorce((Player) sender);
             } else {
@@ -79,7 +78,7 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
             return true;
         });
 
-        getCommand("setmariagehome").setExecutor((sender, command, label, args) -> {
+        Objects.requireNonNull(getCommand("setmariagehome")).setExecutor((sender, command, label, args) -> {
             if (sender instanceof Player) {
                 setMarriageHome((Player) sender);
             } else {
@@ -88,7 +87,7 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
             return true;
         });
 
-        getCommand("mariagehome").setExecutor((sender, command, label, args) -> {
+        Objects.requireNonNull(getCommand("mariagehome")).setExecutor((sender, command, label, args) -> {
             if (sender instanceof Player) {
                 teleportToMarriageHome((Player) sender);
             } else {
@@ -99,48 +98,16 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
     }
 
     private void openMainGUI(Player player) {
-        Inventory mainGUI = Bukkit.createInventory(new MarriageInventoryHolder(), 45, ChatColor.BOLD + "Marriage Status");
+        Inventory mainGUI = Bukkit.createInventory(new MarriageInventoryHolder(this), 45, ChatColor.BOLD + "Marriage Status");
 
         ItemStack proposeItem = new ItemStack(Material.CLAY_BALL);
         ItemMeta proposeItemMeta = proposeItem.getItemMeta();
-        proposeItemMeta.setDisplayName(ChatColor.AQUA + "Choisir un Partenaire!");
+        Objects.requireNonNull(proposeItemMeta).setDisplayName(ChatColor.AQUA + "Choisir un Partenaire!");
         proposeItemMeta.setCustomModelData(6);
         proposeItem.setItemMeta(proposeItemMeta);
         mainGUI.setItem(21, proposeItem);
 
         player.openInventory(mainGUI);
-    }
-
-    private void openPlayerSelectionGUI(Player proposer) {
-        Inventory playerSelectionGUI = Bukkit.createInventory(new MarriageInventoryHolder(), 45, ChatColor.BOLD + "Sélectionner un Joueur");
-
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            if (!onlinePlayer.equals(proposer)) {
-                ItemStack playerHeadItem = new ItemStack(Material.PLAYER_HEAD);
-                SkullMeta skullMeta = (SkullMeta) playerHeadItem.getItemMeta();
-                skullMeta.setOwningPlayer(onlinePlayer);
-                playerHeadItem.setItemMeta(skullMeta);
-
-                playerSelectionGUI.addItem(playerHeadItem);
-            }
-        }
-
-        proposer.openInventory(playerSelectionGUI);
-    }
-
-    private void proposeMarriage(Player proposer, Player selectedPlayer) {
-        proposer.sendMessage(ChatColor.GREEN + "Vous avez proposé le mariage à " + selectedPlayer.getName() + " !");
-        selectedPlayer.sendMessage(ChatColor.LIGHT_PURPLE + proposer.getName() + " vous a proposé le mariage !");
-        marriages.put(proposer.getUniqueId(), selectedPlayer.getUniqueId());
-        marriages.put(selectedPlayer.getUniqueId(), proposer.getUniqueId());
-
-        Location marriageHome = proposer.getLocation();
-        marriageHomes.put(proposer.getUniqueId(), marriageHome);
-        marriageHomes.put(selectedPlayer.getUniqueId(), marriageHome);
-
-        applyMarriageEffects(proposer, selectedPlayer);
-
-        saveMarriages();
     }
 
     private void applyMarriageEffects(Player player1, Player player2) {
@@ -182,7 +149,7 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
             marriages.remove(partnerId);
             marriageHomes.remove(player.getUniqueId());
             marriageHomes.remove(partnerId);
-            player.sendMessage(ChatColor.RED + "Vous avez divorcé avec " + partner.getName() + ".");
+            player.sendMessage(ChatColor.RED + "Vous avez divorcé avec " + Objects.requireNonNull(partner).getName() + ".");
             partner.sendMessage(ChatColor.RED + "Vous avez divorcé avec " + player.getName() + ".");
         } else {
             player.sendMessage(ChatColor.RED + "Vous n'êtes pas marié.");
@@ -218,16 +185,16 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
     private void loadMarriages() {
         if (config.contains("marriages")) {
             marriages.clear();
-            for (String key : config.getConfigurationSection("marriages").getKeys(false)) {
+            for (String key : Objects.requireNonNull(config.getConfigurationSection("marriages")).getKeys(false)) {
                 UUID playerId = UUID.fromString(key);
-                UUID partnerId = UUID.fromString(config.getString("marriages." + key));
+                UUID partnerId = UUID.fromString(Objects.requireNonNull(config.getString("marriages." + key)));
                 marriages.put(playerId, partnerId);
             }
         }
 
         if (config.contains("marriageHomes")) {
             marriageHomes.clear();
-            for (String key : config.getConfigurationSection("marriageHomes").getKeys(false)) {
+            for (String key : Objects.requireNonNull(config.getConfigurationSection("marriageHomes")).getKeys(false)) {
                 UUID playerId = UUID.fromString(key);
                 Location location = (Location) config.get("marriageHomes." + key);
                 marriageHomes.put(playerId, location);
@@ -235,7 +202,7 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
         }
     }
 
-    private void saveMarriages() {
+    public void saveMarriages() {
         config.set("marriages", null);
         for (UUID playerId : marriages.keySet()) {
             UUID partnerId = marriages.get(playerId);
@@ -269,5 +236,10 @@ public class AfeliaMarriage extends JavaPlugin implements Listener {
 
         MarriageInventoryHolder marriageHolder = (MarriageInventoryHolder) event.getInventory().getHolder();
         marriageHolder.handleMarriageInventoryClick(player, clickedItem);
+    }
+
+    // New method to provide access to the 'marriages' map
+    public Map<UUID, UUID> getMarriages() {
+        return marriages;
     }
 }
